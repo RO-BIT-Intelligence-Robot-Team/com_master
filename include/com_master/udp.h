@@ -344,7 +344,6 @@ public slots:
   }
 
 private:
-  bool connection = false;
 };
 };  // namespace udp
 

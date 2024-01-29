@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <iostream>
 #include "udp.h"
+#include <QTimer>
 
 #include <std_msgs/Bool.h>
 #include <sensor_msgs/Image.h>
@@ -22,10 +23,35 @@
 #define IMAGE_WIDTH
 #define IMAGE_HEIGHT
 
+struct communication_check
+{
+  bool connection = false;
+  int check_cnt = 0;
+
+  bool robot_init = false;
+};
+
+struct camera_status
+{
+  bool[6] transport_status = { false, false, false, false, false, false };
+  float[6] fps = {
+    0,
+  };
+  float[6] bps = {
+    0,
+  };
+}
+
+struct realsense_status
+{
+  bool[6] = transport_status = { false, false, false, false, false, false };
+}
+
 udp::UDP udpInstance;
 
 ros::Publisher udp_publisher;
 
-void robotControlMsgCallBack(const mobile_base_msgs::RobotControl::ConstPtr &msg);
+void robotControlMsgCallBack(const mobile_base_msgs::RobotControl::ConstPtr& msg);
+QTimer *_5ms_Timer, *_6ms_Timer, *_1s_Timer, *_1ms_Timer;
 
-#endif 
+#endif
