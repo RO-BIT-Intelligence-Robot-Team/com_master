@@ -22,35 +22,45 @@
 // uint16_t velodyne_PORT = 6666;
 // uint16_t SLAM_PORT = 6665;
 
-QHostAddress ROBOT_IP = QHostAddress("192.168.188.100");
-QHostAddress OPERATOR_IP = QHostAddress("192.168.188.253");
-
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "robot_udp_communication_master");
+  ros::init(argc, argv, "robot_udp_communication_master_node");
   ros::NodeHandle nh;
 
-  ROS_INFO("[COM] Starting Robot Communication Node.");
-
   ros::Rate loop_rate(100);
+
+  CommunicationMaster ComMaster;
+
   while (ros::ok())
   {
+    ComMaster.test();
     ros::spinOnce();
     loop_rate.sleep();
   }
-  ROS_INFO("[COM] Closing Communication Node.");
   return 0;
 }
 
+void CommunicationMaster::test()
+{
+  std::cout << "BO" << std::endl;
+
+  QByteArray bool_data, flipper_data, rpm_data;
+  bool_data.append(false);
+  emit controlMsgBoolDataSignal(bool_data);
+}
+
 // Current Robot Status Update Fuction.
-void robotControlMsgCallBack(const mobile_base_msgs::RobotControl::ConstPtr& msg)
+void CommunicationMaster::robotControlMsgCallBack(const mobile_base_msgs::RobotControl::ConstPtr& msg)
 {
   ROS_INFO("[COM] Recieved Control Message.");
-  mobile_base_msgs::RobotCommunication pub_msg;
+  QByteArray bool_data, flipper_data, rpm_data;
 
   // Mobile Base Status Update.
   mobile_base_status_instance.init_trigger = msg->init_trigger;
+  bool_data.push_back(msg->init_trigger);
   mobile_base_status_instance.auto_flipper = msg->flipper_control.flipper_auto;
+  bool_data.push_back(msg->flipper_control.flipper_auto);
+
   for (int i = 0; i < 4; i++)
   {
     mobile_base_status_instance.flipper_target_position[i] = msg->flipper_control.flipper_target_position[i];
@@ -64,6 +74,7 @@ void robotControlMsgCallBack(const mobile_base_msgs::RobotControl::ConstPtr& msg
   for (int i = 0; i < NUM_OF_CAMERA; i++)
   {
     camera_status_instance.transport_status[i] = msg->image_transport_status[i];
+    bool_data.push_back(msg->image_transport_status[i]);
   }
   camera_status_instance.command = msg->camera_request;
 
@@ -71,5 +82,8 @@ void robotControlMsgCallBack(const mobile_base_msgs::RobotControl::ConstPtr& msg
   for (int i = 0; i < NUM_OF_REALSENSE; i++)
   {
     realsense_status_instance.transport_status[i] = msg->realsense_transport_status[i];
+    bool_data.push_back(msg->realsense_transport_status[i]);
   }
+
+  emit controlMsgBoolDataSignal(bool_data);
 }

@@ -3,7 +3,6 @@
 
 #include <ros/ros.h>
 #include <iostream>
-#include "udp.h"
 #include <QTimer>
 
 #include <std_msgs/Bool.h>
@@ -31,83 +30,102 @@
 #define NUM_OF_CAMERA 6     // MAX 10
 #define NUM_OF_REALSENSE 4  // MAX 4
 
-struct communication_check
+class CommunicationMaster : public QObject
 {
-  bool connection = false;
-  int check_cnt = 0;
-};
+  Q_OBJECT
 
-struct mobile_base_status
-{
-  bool init_trigger = false;  // robotControlMsgCallBack
-  bool robot_init = false;
-
-  bool stm_connection = false;
-
-  bool auto_flipper = false;  // robotControlMsgCallBack
-
-  float flipper_target_position[4] = {
-    0,
-  };  // robotControlMsgCallBack
-
-  float flipper_current[4] = {
-    0,
-  };  // robotControlMsgCallBack
-
-  float flipper_speed[4] = {
-    0,
-  };  // robotControlMsgCallBack
-
-  float RPM[2] = {
-    0,
-  };  // robotControlMsgCallBack
-
-  float battery[4] = {
-    0,
-  };
-};
-
-struct manipulator_status
-{
-};
-
-struct camera_status
-{
-  bool transport_status[NUM_OF_CAMERA];  // robotControlMsgCallBack
-  float fps[NUM_OF_CAMERA] = {
-    0,
+  struct communication_check
+  {
+    bool connection = false;
+    int check_cnt = 0;
   };
 
-  float bps[NUM_OF_CAMERA] = {
-    0,
+  struct mobile_base_status
+  {
+    bool init_trigger = false;  // robotControlMsgCallBack
+    bool robot_init = false;
+
+    bool stm_connection = false;
+
+    bool auto_flipper = false;  // robotControlMsgCallBack
+
+    float flipper_target_position[4] = {
+      0,
+    };  // robotControlMsgCallBack
+
+    float flipper_current[4] = {
+      0,
+    };  // robotControlMsgCallBack
+
+    float flipper_speed[4] = {
+      0,
+    };  // robotControlMsgCallBack
+
+    float RPM[2] = {
+      0,
+    };  // robotControlMsgCallBack
+
+    float battery[4] = {
+      0,
+    };
   };
 
-  std::string command;  // robotControlMsgCallBack
+  struct manipulator_status
+  {
+  };
+
+  struct camera_status
+  {
+    bool transport_status[NUM_OF_CAMERA];  // robotControlMsgCallBack
+    float fps[NUM_OF_CAMERA] = {
+      0,
+    };
+
+    float bps[NUM_OF_CAMERA] = {
+      0,
+    };
+
+    std::string command;  // robotControlMsgCallBack
+  };
+
+  struct realsense_status
+  {
+    bool transport_status[NUM_OF_REALSENSE];  // robotControlMsgCallBack
+    float fps[NUM_OF_REALSENSE] = {
+      0,
+    };
+
+    float bps[NUM_OF_REALSENSE] = {
+      0,
+    };
+  };
+
+  ros::Publisher publisher_robot_state;
+  ros::Publisher publisher_udp_image_data;
+
+public:
+  CommunicationMaster()
+  {
+    ROS_INFO("[COM] Starting Robot Communication Node.");
+  }
+
+  ~CommunicationMaster()
+  {
+    ROS_INFO("[COM] Closing Communication Node.");
+  }
+
+  void robotControlMsgCallBack(const mobile_base_msgs::RobotControl::ConstPtr& msg);
+  void test();
+
+private:
+  communication_check communication_check_instance;
+  mobile_base_status mobile_base_status_instance;
+  camera_status camera_status_instance;
+  realsense_status realsense_status_instance;
+  QTimer *_5ms_Timer, *_6ms_Timer, *_1s_Timer, *_1ms_Timer;
+
+signals:
+  void controlMsgBoolDataSignal(QByteArray bool_data);
 };
-
-struct realsense_status
-{
-  bool transport_status[NUM_OF_REALSENSE];  // robotControlMsgCallBack
-  float fps[NUM_OF_REALSENSE] = {
-    0,
-  };
-
-  float bps[NUM_OF_REALSENSE] = {
-    0,
-  };
-};
-
-udp::UDP udpInstance;
-communication_check communication_check_instance;
-mobile_base_status mobile_base_status_instance;
-camera_status camera_status_instance;
-realsense_status realsense_status_instance;
-
-ros::Publisher publisher_robot_state;
-ros::Publisher publisher_udp_image_data;
-
-void robotControlMsgCallBack(const mobile_base_msgs::RobotControl::ConstPtr& msg);
-
-QTimer *_5ms_Timer, *_6ms_Timer, *_1s_Timer, *_1ms_Timer;
 
 #endif
