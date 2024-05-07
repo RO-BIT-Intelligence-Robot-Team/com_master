@@ -5,12 +5,10 @@
 
 #include <ros/ros.h>
 #include <iostream>
-#include "udp/udp.h"
 #include "com_master.h"
 #include <QObject>
 #include <QByteArray>
-
-using namespace udp;
+#include "udp/udp.h"
 
 class UdpTransfer : public QObject
 {
@@ -21,9 +19,13 @@ public:
 
 public slots:
   void controlMsgBoolDataSlot(QByteArray bool_data);
+  void joyMsgDataSlot(QByteArray joy_data);
 
 private:
   CommunicationMaster* comMaster;
+  udp::UDP* udpInstance = nullptr;
+
+  QUdpSocket* joy_socket;
 };
 
 #endif

@@ -1,12 +1,20 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(com_master)
+set(CMAKE_AUTOMOC ON)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
 
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   mobile_base_msgs
 )
-find_package(Qt5 COMPONENTS Core Gui Widgets Network)
+
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network)
 
 catkin_package(
 
@@ -25,17 +33,18 @@ include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
   ${Qt5Core_INCLUDE_DIRS}
-
+  ${OpenCV_INCLUDE_DIRS}
 )
+link_directories(${OpenCV_LIB_DIR})
 
-
-add_executable(com_master ${MOC_FILES} src/com_master.cpp src/udp_transfer.cpp)
-target_link_libraries(com_master
+add_executable(com_master ${MOC_FILES} src/com_master.cpp src/udp_transfer.cpp include/com_master/udp/udp.h)
+target_link_libraries(com_master PRIVATE
   ${catkin_LIBRARIES}
   Qt5::Core
   Qt5::Gui
   Qt5::Widgets
   Qt5::Network
+  ${Opencv_LIBS}
 )
 
 add_dependencies(com_master ${catkin_EXPORTED_TARGETS})
