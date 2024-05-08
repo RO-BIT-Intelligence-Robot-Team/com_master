@@ -6,6 +6,12 @@ UdpTransfer::UdpTransfer(CommunicationMaster* comMaster) : comMaster(comMaster)
   udpInstance = new udp::UDP;
 
   joy_socket = new QUdpSocket(this);
+  main_img_socket = new QUdpSocket(this);
+
+  if (main_img_socket->bind(udpInstance->OPERATOR_IP, udpInstance->cam1_PORT));
+  {
+    connect(main_img_socket, SIGNAL(readyRead()), this, SLOT(mainImageSlot()));
+  }
 
   connect(comMaster, SIGNAL(controlMsgBoolDataSignal(QByteArray)), this, SLOT(controlMsgBoolDataSlot(QByteArray)));
   connect(comMaster, SIGNAL(joyDataSignal(QByteArray)), this, SLOT(joyMsgDataSlot(QByteArray)));
@@ -33,5 +39,10 @@ void printHex(const QByteArray& data)
 void UdpTransfer::joyMsgDataSlot(QByteArray joy_data)
 {
   udpInstance->UdpArrayTransfer(joy_data, udpInstance->mobile_base_PORT, udpInstance->ROBOT_IP, *joy_socket);
-  std::cout << "Transfer" << std::endl;
+}
+
+void UdpTransfer::mainImageSlot()
+{
+  cv::Mat img;
+  img = udpInstance->MatImgRcv(img, udpInstance->cam1_PORT, udpInstance->OPERATOR_IP, *main_img_socket);
 }

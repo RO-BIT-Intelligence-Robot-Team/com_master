@@ -21,11 +21,15 @@ public slots:
   void controlMsgBoolDataSlot(QByteArray bool_data);
   void joyMsgDataSlot(QByteArray joy_data);
 
+public Q_SLOTS:
+  void mainImageSlot();
+
 private:
   CommunicationMaster* comMaster;
   udp::UDP* udpInstance = nullptr;
 
   QUdpSocket* joy_socket;
+  QUdpSocket* main_img_socket;
 };
 
 #endif

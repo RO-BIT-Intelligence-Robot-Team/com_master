@@ -117,7 +117,7 @@ public:
 
   // Publishers
   ros::Publisher publisher_robot_state;
-  ros::Publisher publisher_udp_image_data;
+  ros::Publisher publisher_udp_image_main;
 
   // Topic Callbacks
   void joyDataCallback(const mobile_base_msgs::STMtx::ConstPtr& msg);
