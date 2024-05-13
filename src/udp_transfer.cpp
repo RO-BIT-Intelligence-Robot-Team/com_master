@@ -45,4 +45,5 @@ void UdpTransfer::mainImageSlot()
 {
   cv::Mat img;
   img = udpInstance->MatImgRcv(img, udpInstance->cam1_PORT, udpInstance->OPERATOR_IP, *main_img_socket);
+  
 }
